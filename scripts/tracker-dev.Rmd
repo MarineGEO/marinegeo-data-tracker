@@ -1,0 +1,171 @@
+---
+title: "MarineGEO data tracker development"
+output: html_notebook
+---
+
+Development of the graphs for the MarineGEO data tracker dashboard
+
+```{r include=FALSE}
+library(tidyverse)
+library(wordcloud)
+library(tm)
+library(here)
+library(forcats)
+set_here(path="../")
+```
+
+
+# Load the csv file into a data frame
+
+```{r}
+tracker <- read_csv(here("data/data-status-tracker.csv"))
+tracker
+```
+
+
+# Quick check - frequency of projects
+```{r}
+tracker %>% group_by(Project) %>% count()
+
+```
+
+
+## Word Cloud of all the project names
+
+Word cloud based on frequency. Project names that are more frequent are larger. Note: this splits project by word (ie Seagrass Monitoring is "Seagrass" & "Monitoring").
+
+```{r, fig.width=5, fig.height=5}
+d <- Corpus(VectorSource(tracker$Project)) %>% tm_map(content_transformer(tolower))
+
+#inspect(d)
+
+tdm <- TermDocumentMatrix(d) %>%
+  as.matrix()
+
+v <- sort(rowSums(tdm), decreasing = TRUE)
+d <- data.frame(word = names(v), freq=v)
+
+set.seed(12)
+wordcloud(words=d$word, freq = d$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.25, colors=brewer.pal(8, "Dark2"))
+
+```
+
+## Frequency plot of projects
+```{r}
+tracker %>%
+  group_by(Project) %>% 
+  count() %>% 
+  ggplot(aes(x=reorder(Project,-n), y=n, fill=-n))+
+  geom_bar(stat="identity")+
+  xlab("Project")+
+  ylab("Count")+
+  coord_flip()+
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    legend.position = "None")
+```
+
+
+
+# Auxiliary info 
+```{r}
+# named list for site codes
+sites <- c("TAS"="Tasmania", "SFB"="San Francisco Bay", "KB"="Kane'ohe Bay",  "HAK"="Hakai", "FP"="Fort Pierce",  "FHL"="Friday Harbor", "EW"="Edgewater",  "CB"="Carrie Bow Cay",  "BT"="Bocas del Toro",  "TGC"="Texas Gulf Coast")
+
+sites
+```
+
+
+# "Tetris"" Plot
+```{r}
+selected_project <- "Benthic Photoquadrats"
+
+tracker %>% ggplot(aes(Year, Site))+
+  geom_tile(fill="#97c8eb", color="black", size=0.5)+
+  coord_equal()+
+  theme_bw() +  # change theme simple with no axis or tick marks
+    theme(#panel.border = element_blank(), 
+          panel.grid.major = element_blank(),
+          plot.title = element_text(hjust = 0.5),
+          panel.grid.minor = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position="bottom", # position of legend or none
+          legend.direction="horizontal", # orientation of legend
+          legend.title= element_blank(), # no title for legend
+          legend.key.size = unit(1.0, "cm"),
+          axis.text.x=element_text(size=10),
+          axis.text.y=element_text(size=10)
+          )
+
+```
+
+
+
+```{r, fig.height=12, fig.width=14}
+
+trackerFake <- read_csv(here("data/data-status-tracker-fake.csv"))
+
+
+
+# make a data frame with all combinations of Projects, Sites, Years
+filled <- trackerFake %>% expand(Site, Year, Project) %>% 
+  left_join(trackerFake) %>% mutate(level=case_when(
+  L1 == "yes" ~ 1,
+  L0 == "yes" ~ 0,
+  TRUE ~ NA_real_ 
+)) 
+
+
+filled %>%
+  mutate(siteName = sites[Site]) %>% 
+  ggplot(aes(Year, fct_reorder(siteName, desc(siteName))))+
+        geom_tile(aes(fill=factor(level)), color="black", size=0.1)+
+        scale_fill_manual(values=c("#c6eafb","#0d5388"), na.value = "white", breaks=c(0,1), labels=c(" Level 0", " Level 1"))+
+        coord_equal()+
+        theme_bw() +
+        theme(panel.grid.major = element_blank(),
+              plot.title = element_text(hjust = 0.5),
+              panel.grid.minor = element_blank(),
+              axis.title.x = element_blank(),
+              axis.title.y = element_blank(),
+              legend.position="right", # position of legend or none
+              legend.direction="vertical", # orientation of legend
+              legend.title= element_blank(), # no title for legend
+              axis.text.x=element_text(size=10, angle=90, vjust=0.5),
+              axis.text.y=element_text(size=10)
+              ) + facet_wrap(~Project, ncol = 8)
+```
+
+```{r}
+selected_project <- "Squidpops"
+
+filled %>% 
+  mutate(siteName = sites[Site]) %>% 
+  filter(Project==selected_project) %>% 
+  ggplot(aes(Year, fct_reorder(siteName, desc(siteName))))+
+        geom_tile(aes(fill=factor(level)), color="black", size=0.1)+
+        scale_fill_manual(values=c("#c6eafb","#0d5388"), na.value = "white", breaks=c(0,1), labels=c(" Level 0", " Level 1"))+
+        coord_equal()+
+        ggtitle(selected_project)+
+        theme_bw() +
+        theme(panel.grid.major = element_blank(),
+              plot.title = element_text(hjust = 0.5),
+              panel.grid.minor = element_blank(),
+              axis.title.x = element_blank(),
+              axis.title.y = element_blank(),
+              legend.position="right", # position of legend or none
+              legend.direction="vertical", # orientation of legend
+              legend.title= element_blank(), # no title for legend
+              axis.text.x=element_text(size=10),
+              axis.text.y=element_text(size=10)
+              ) 
+
+```
+
+
+```{r}
+filled %>% mutate(siteName = sites[Site])
+```
+
