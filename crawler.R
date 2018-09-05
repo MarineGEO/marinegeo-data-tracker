@@ -16,7 +16,8 @@ if(!fs::dir_exists(l1_data_path)){
 }  
 
 # level 0 data processing
-dirsL0 <- tibble(path =list.dirs(l0_data_path)) # lists all the dirs in the folder
+dirsL0 <- tibble(path =list.dirs(l0_data_path)) %>% # lists all the dirs in the folder
+  filter(!grepl("NETWORK", path))
 leng <- dirsL0 %>% mutate(number=str_count(path,pattern="/")) %>% pull(number) %>% max() # max number of slashes
 df_dirsL0 <- dirsL0 %>% separate(path, into=c(paste0("folder",0:leng+1)), sep="/", remove=FALSE) # split df into columns by forword slash
 level0_df <- df_dirsL0 %>% 
@@ -25,8 +26,9 @@ level0_df <- df_dirsL0 %>%
   mutate(level=0)  %>% # add the data level
   distinct(site, year, project, .keep_all = TRUE) # remove any duplicate rows
 
-# level 0 data processing
-dirsL1 <- tibble(path =list.dirs(l1_data_path)) # lists all the dirs in the folder
+# level 1 data processing
+dirsL1 <- tibble(path =list.dirs(l1_data_path)) %>% # lists all the dirs in the folder
+  filter(!grepl(".git", path))
 leng <- dirsL1 %>% mutate(number=str_count(path,pattern="/")) %>% pull(number) %>% max() # max number of slashes
 df_dirsL1 <- dirsL1 %>% separate(path, into=c(paste0("folder",0:leng+1)), sep="/", remove=FALSE) # split df into columns by forword slash
 level1_df <- df_dirsL1 %>% 
@@ -40,7 +42,7 @@ level1_df
 
 # save to disk as a csv
 write_csv(level0_df, here("data/data-status-level-zero.csv"))
-write_csv(level0_df, here("data/data-status-level-one.csv"))
+write_csv(level1_df, here("data/data-status-level-one.csv"))
 }
 
 

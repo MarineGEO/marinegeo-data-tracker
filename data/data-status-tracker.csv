@@ -1,4 +1,4 @@
-﻿Site,Year,Project,L0,L1,Notes
+Site,Year,Project,L0,L1,Notes
 BT,2015,Benthic Photoquadrats,yes,yes,
 TAS,2017,Reef Life Survey,yes,,
 TAS ,2017,Seagrass Monitoring,yes,,Percent cover seagrass species needs to be identifed
@@ -101,3 +101,4 @@ CB,2014,Squidpops,,yes,Records from squidpop global master datasheet
 BT,2015,Squidpops,,yes,Records from squidpop global master datasheet
 FHL,2016,Squidpops,,yes,Records from squidpop global master datasheet
 KB,2017,Squidpops,yes,,
+CB,2016,Reef Life Survey,yes,,

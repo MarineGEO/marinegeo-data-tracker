@@ -1,5 +1,5 @@
 # functions for producing MarineGEO data tracker figures
-
+library(tidyverse)
 # prep the data tracker dataframe
 prep <- function(tracker){
   filled <- tracker %>% 
@@ -30,14 +30,14 @@ sites <- c("TAS"="Tasmania",
 # Overview facet plot
 trackerFacet <- function(df){
   df %>% 
-  mutate(siteName = sites[Site]) %>% 
+  dplyr::mutate(siteName = sites[Site]) %>% 
     ggplot(aes(Year, fct_reorder(siteName, desc(siteName))))+
     geom_tile(aes(fill=factor(level)), color="black", size=0.1)+
     scale_fill_manual(values=c("#c6eafb","#0d5388"), na.value = "white", breaks=c(0,1), labels=c(" Level 0", " Level 1"))+
     coord_equal()+
     theme_bw() +
     theme(panel.grid.major = element_blank(),
-          plot.title = element_text(hjust = 0.5),
+          plot.title = element_text(hjust = 0.5, size=24),
           panel.grid.minor = element_blank(),
           axis.title.x = element_blank(),
           axis.title.y = element_blank(),
@@ -68,8 +68,8 @@ trackerProject <- function(data, selected_project){
           legend.position="right", # position of legend or none
           legend.direction="vertical", # orientation of legend
           legend.title= element_blank(), # no title for legend
-          axis.text.x=element_text(size=10),
-          axis.text.y=element_text(size=10)) 
+          axis.text.x=element_text(size=16),
+          axis.text.y=element_text(size=16)) 
 }
 
 # plot by site
@@ -77,13 +77,17 @@ trackerSite <- function(data, selected_site){
   
   uniqueProjects <- data %>% filter(Site==selected_site) %>% filter(!is.na(L0) | !is.na(L1)) %>% pull(Project) %>% unique()
   
+  uniqueYears <- data %>% filter(Site==selected_site) %>% filter(!is.na(L0) | !is.na(L1)) %>% pull(Year) %>% unique()
+  
   data %>% 
     filter(Site==selected_site) %>% 
+    filter(Year %in% uniqueYears) %>% 
     filter(Project %in% uniqueProjects) %>% 
     ggplot(aes(x=Year, y=fct_reorder(Project, desc(Project))))+
     geom_tile(aes(fill=factor(level)), color="black", size=0.2)+
     scale_fill_manual(values=c("#c6eafb","#0d5388"), na.value = "white", breaks=c(0,1), labels=c(" Level 0", " Level 1"))+
     coord_equal(ratio = 1)+
+    scale_x_continuous(breaks=uniqueYears)+
     ggtitle(sites[selected_site])+
     theme_bw() +
     theme(panel.border = element_blank(),
