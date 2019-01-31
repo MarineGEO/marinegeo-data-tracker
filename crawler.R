@@ -23,6 +23,7 @@ df_dirsL0 <- dirsL0 %>% separate(path, into=c(paste0("folder",0:leng+1)), sep="/
 level0_df <- df_dirsL0 %>% 
   select(path, root=folder2, site=folder3, year=folder4, project=folder5) %>% # select and rename columns of interest
   filter(!is.na(year), !is.na(project)) %>% # filter out null values
+  filter(!project=="Other") %>% # remove the other folders
   mutate(level=0)  %>% # add the data level
   distinct(site, year, project, .keep_all = TRUE) # remove any duplicate rows
 
@@ -38,7 +39,6 @@ level1_df <- df_dirsL1 %>%
   mutate(level=1)  %>% # add the data level
   distinct(site, year, project, .keep_all = TRUE) # remove any duplicate rows
 
-level1_df
 
 # save to disk as a csv
 write_csv(level0_df, here("data/data-status-level-zero.csv"))
