@@ -14,16 +14,16 @@ prep <- function(tracker){
 
 
 # named list of site abbreviations and names
-sites <- c("TAS"="Tasmania", 
-           "SFB"="San Francisco Bay", 
-           "KB"="Kane'ohe Bay",  
-           "HAK"="Hakai", 
-           "FP"="Fort Pierce",  
-           "FHL"="Friday Harbor", 
-           "EW"="Edgewater",  
-           "CB"="Carrie Bow Cay",  
-           "BT"="Bocas del Toro",  
-           "TGC"="Texas Gulf Coast")
+sites <- c("AUS-TAS"="Tasmania", 
+           "USA-SFB"="San Francisco Bay", 
+           "USA-HIK"="Kane'ohe Bay",  
+           "CAN-BCC"="Hakai", 
+           "USA-IRL"="Fort Pierce",  
+           "USA-WAS"="Friday Harbor", 
+           "USA-MDA"="Edgewater",  
+           "BEL-CBC"="Carrie Bow Cay",  
+           "PAN-BDT"="Bocas del Toro",  
+           "USA-TXS"="Texas Gulf Coast")
 
 
 
